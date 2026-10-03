@@ -1,4 +1,4 @@
-# Theory of Animation
+# Animation Physics
 
 An interactive explainer of what drives motion in software: **keyframes, springs, gestures, and physics**, and how to combine them. It has a written theory page and a demo with 13 animations that you can drag and test.
 
