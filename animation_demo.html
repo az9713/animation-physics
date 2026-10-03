@@ -266,7 +266,7 @@ MODES.push({id:1,name:'Keyframes',drivers:'K',links:[['#keyframes','Keyframes'],
   expl:`<p><span class="tag">Driver:</span> the author. You choose values and times. The software fills in the states between them.</p>
 <div class="eq">x(t<sub>i</sub>) = x<sub>i</sub> &nbsp;&nbsp; x(t) = f(t; θ<sub>author</sub>)</div>
 <p>Clawd uses x(0)=0, x(1)=100, x(2.4)=50, scaled to pixels. Rotation and scale also have keyframes, so the state is a vector: [p<sub>x</sub>, p<sub>y</sub>, s, θ, α]ᵀ.</p>
-<p>The easing menu changes only E(t) in x(t) = A + (B − A)·E(t). The keyframe values stay the same. John: use keyframes when you know the choreography in advance.</p>`,
+<p>The easing menu changes only E(t) in x(t) = A + (B − A)·E(t). The keyframe values stay the same. The video: use keyframes when you know the choreography in advance.</p>`,
   enter(){
     M.kt=0; M.play=false;
     ov.innerHTML=[[0,0],[100,1],[50,2.4]].map(([v,t])=>{const x=px1(v);
@@ -288,7 +288,7 @@ MODES.push({id:2,name:'Spring',drivers:'S',defaults:{preset:'bouncy'},links:[['#
   expl:`<p><span class="tag">Driver:</span> a target state plus dynamics. You give a destination. The spring decides the path.</p>
 <div class="eq">m·ẍ + c·ẋ + k(x − x<sub>target</sub>) = 0</div>
 <p>Click the stage to move the target. Each preset sets a damping ratio ζ and a natural frequency ω, with m = 1, k = mω², c = 2ζmω. The readout shows the values. Gentle: ζ=1, ω=6. Snappy: ζ=0.85, ω=24. Bouncy: ζ=0.25, ω=12.</p>
-<p>A linear transition is 0 → 20 → 40 → 60 → 80 → 100. A spring is like 0 → 45 → 85 → 108 → 96 → 101 → 100. John: springs suit buttons and responsive interactions. He describes the behavior in words. The equation comes from the theory page, which adds it.</p>`,
+<p>A linear transition is 0 → 20 → 40 → 60 → 80 → 100. A spring is like 0 → 45 → 85 → 108 → 96 → 101 → 100. The video: springs suit buttons and responsive interactions. It describes the behavior in words. The equation comes from the theory page, which adds it.</p>`,
   enter(){
     S.x=SW*.25; S.y=SH/2; M.tx=SW*.7; M.ty=SH/2;
     M.sx={x:S.x,v:0}; M.sy={x:S.y,v:0};
@@ -308,7 +308,7 @@ MODES.push({id:3,name:'Gesture',drivers:'G',drag:true,defaults:{follow:'direct',
 <div class="eq">x(t) = f(u(t)) &nbsp;&nbsp; x<sub>object</sub> = x<sub>pointer</sub></div>
 <div class="eq">x<sub>object</sub>(t) = (1 − λ)·x<sub>object</sub>(t − Δt) + λ·x<sub>pointer</sub>(t)</div>
 <p>Direct follow copies the pointer. Lag follow uses λ. A smaller λ gives softer, later following. A larger λ gives tighter tracking. Here λ is defined per 1/60 s, so the feel does not depend on the display refresh rate. The dashed ring and the dot show the pointer target. They appear only in lag mode.</p>
-<p>John: gesture animation is input-driven, not timeline-driven.</p>`,
+<p>The video: gesture animation is input-driven, not timeline-driven.</p>`,
   enter(){ov.innerHTML=`<circle id="ptr" r="46" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-dasharray="6 5"/><circle id="pdot" r="4" fill="#2dd4bf"/>`;},
   step(dt){
     if(C.follow==='direct'){S.x=P.x;S.y=P.y;}
@@ -340,7 +340,7 @@ MODES.push({id:5,name:'Gesture + spring',drivers:'GS',drag:true,defaults:{preset
   expl:`<p><span class="tag">Drivers:</span> gesture, then spring. <span class="tag">Handoff:</span> at release, the position x<sub>r</sub> and velocity v<sub>r</sub> become the starting conditions of the spring.</p>
 <div class="eq">x(t<sub>release</sub>) = x<sub>r</sub>, ẋ(t<sub>release</sub>) = v<sub>r</sub> → m·ẍ + c·ẋ + k(x − x<sub>slot</sub>) = 0</div>
 <p>Drag Clawd and release it. The spring target is the nearest slot. A fast flick carries v<sub>r</sub> into the spring, so Clawd can overshoot the slot. The readout shows x<sub>r</sub> and v<sub>r</sub>.</p>
-<p>John: this is the original iPhone-style fling. The gesture sets the motion. The spring sets how it settles. The motion stays continuous between the finger and the software.</p>`,
+<p>The video: this is the original iPhone-style fling. The gesture sets the motion. The spring sets how it settles. The motion stays continuous between the finger and the software.</p>`,
   enter(){
     S.x=SW/2; S.y=SH*.78; P.x=S.x; P.y=S.y; M.ph='idle'; M.rel=null;
     M.slots=[.2,.5,.8].map(f=>({x:SW*f,y:SH*.3}));
@@ -400,7 +400,7 @@ MODES.push({id:8,name:'Keyframes + gesture',drivers:'KG',drag:true,defaults:{kon
   controls:[{type:'check',id:'kon',label:'Keyframes on'}],
   expl:`<p><span class="tag">Drivers:</span> gesture owns position. Keyframes own rotation and scale. Each property has one owner, so the drivers do not conflict.</p>
 <div class="eq">[p<sub>x</sub>, p<sub>y</sub>] = f(u(t)) &nbsp;&nbsp; [θ, s] = f(t; θ<sub>author</sub>)</div>
-<p>Drag Clawd. Rotation and scale loop every 2 s on keyframes at 0, 1, and 2 s. The checkbox switches the keyframes off, and the drag still works. John: techniques are combined, and the polish comes from the composition of small effects.</p>`,
+<p>Drag Clawd. Rotation and scale loop every 2 s on keyframes at 0, 1, and 2 s. The checkbox switches the keyframes off, and the drag still works. The video: techniques are combined, and the polish comes from the composition of small effects.</p>`,
   enter(){M.kt=0;},
   step(dt){
     if(C.kon){M.kt=(M.kt+dt)%2;const E=EASE['ease-in-out'];S.rot=kf(KF8,M.kt,'rot',E);S.sx=S.sy=kf(KF8,M.kt,'s',E);}
@@ -500,7 +500,7 @@ MODES.push({id:13,name:'Full chain',drivers:'KSGP',drag:true,defaults:{preset:'s
   controls:[PRESET_CTL],
   expl:`<p><span class="tag">Chain:</span> gesture → spring → physics (dots) → keyframes (celebration) → spring (return) → idle.</p>
 <p>This follows section 8 of the theory page. Drag Clawd and release it within 150 px of the slot. The spring snaps it in. When it settles, 20 dots burst under gravity (physics), and a keyframed spin and scale plays at 0, 0.45, and 0.9 s. Then a spring returns Clawd home. Release outside 150 px, and the spring returns Clawd home with no celebration.</p>
-<p>The theory page chain also has a layout transition and a state-machine reaction. This demo does not have them. John: the polish comes from many small effects composed, not from one large effect.</p>`,
+<p>The theory page chain also has a layout transition and a state-machine reaction. This demo does not have them. The video: the polish comes from many small effects composed, not from one large effect.</p>`,
   enter(){
     M.home={x:SW*.2,y:SH*.75}; M.slot={x:SW*.78,y:SH*.3}; M.dots=[]; M.ph='idle'; M.ct=0;
     S.x=M.home.x; S.y=M.home.y; P.x=S.x; P.y=S.y;

@@ -143,7 +143,7 @@
 
   <section id="driver">
     <h2>1. What drives the motion?</h2>
-    <div class="source"><strong>From John:</strong> animation techniques differ by what controls the object's motion. He introduces keyframes, spring/easing behavior, gestures, and physics, and emphasizes that these techniques can be combined.</div>
+    <div class="source"><strong>The video:</strong> animation techniques differ by what controls the object's motion. It introduces keyframes, spring/easing behavior, gestures, and physics, and emphasizes that these techniques can be combined.</div>
     <p>A useful formalization is to represent the visual state of an element at time <em>t</em> as:</p>
     <div class="eq">x(t) = state of the visual element at time t</div>
     <p>The state may include position, rotation, scale, opacity, color, shape, velocity, or deformation.</p>
@@ -154,7 +154,7 @@
 
   <section id="keyframes">
     <h2>2. Keyframes — choose values and timing</h2>
-    <div class="source"><strong>From John:</strong> keyframes are appropriate when you want an authored sequence: define positions, sizes, opacity, color, or shape at selected times, and let the framework interpolate between them.</div>
+    <div class="source"><strong>The video:</strong> keyframes are appropriate when you want an authored sequence: define positions, sizes, opacity, color, or shape at selected times, and let the framework interpolate between them.</div>
     <p>Suppose horizontal position is represented by <em>x(t)</em>. You may specify:</p>
     <div class="eq">x(0) = 0,&nbsp;&nbsp; x(1) = 100,&nbsp;&nbsp; x(2.4) = 50</div>
     <p>More generally:</p>
@@ -181,7 +181,7 @@
 
   <section id="springs">
     <h2>3. Springs — respond, then settle</h2>
-    <div class="source"><strong>From John:</strong> spring motion is useful for UI elements such as buttons and other responsive interactions. Different parameter choices can make motion feel gentle, snappy, or bouncy.</div>
+    <div class="source"><strong>The video:</strong> spring motion is useful for UI elements such as buttons and other responsive interactions. Different parameter choices can make motion feel gentle, snappy, or bouncy.</div>
     <p>Instead of specifying all intermediate positions, a spring animation typically defines a destination and the dynamics of how the object approaches it.</p>
     <div class="eq">m ẍ + c ẋ + k(x − x<sub>target</sub>) = 0</div>
     <ul>
@@ -205,7 +205,7 @@
 
   <section id="easing">
     <h2>4. Easing — shape velocity over time</h2>
-    <div class="source"><strong>From John:</strong> easing functions determine how an animation accelerates and decelerates, and they substantially change how an interaction feels.</div>
+    <div class="source"><strong>The video:</strong> easing functions determine how an animation accelerates and decelerates, and they substantially change how an interaction feels.</div>
     <p>For a transition from point <em>A</em> to point <em>B</em>, use an easing function <em>E(t)</em>:</p>
     <div class="eq">x(t) = A + (B − A) E(t)</div>
     <p>Examples:</p>
@@ -220,7 +220,7 @@
 
   <section id="gestures">
     <h2>5. Gestures — follow the user</h2>
-    <div class="source"><strong>From John:</strong> gesture-driven motion depends on where the cursor, finger, or hand moves. This makes objects feel draggable, responsive, and alive.</div>
+    <div class="source"><strong>The video:</strong> gesture-driven motion depends on where the cursor, finger, or hand moves. This makes objects feel draggable, responsive, and alive.</div>
     <p>With keyframes:</p>
     <div class="eq">x(t) = f(t)</div>
     <p>Motion depends primarily on time.</p>
@@ -241,7 +241,7 @@
 
   <section id="gesture-spring">
     <h2>6. Gesture + spring</h2>
-    <div class="source"><strong>From John:</strong> the original iPhone-style fling is an example where a gesture establishes motion and spring-like behavior or overshoot determines how the interface settles.</div>
+    <div class="source"><strong>The video:</strong> the original iPhone-style fling is an example where a gesture establishes motion and spring-like behavior or overshoot determines how the interface settles.</div>
     <div class="flow">finger moves → object follows → finger released → infer release velocity → spring/momentum motion → settle</div>
     <p>At release:</p>
     <div class="eq">x(t<sub>release</sub>) = x<sub>r</sub>,&nbsp;&nbsp; ẋ(t<sub>release</sub>) = v<sub>r</sub></div>
@@ -250,7 +250,7 @@
 
   <section id="physics">
     <h2>7. Physics — simulate forces and collisions</h2>
-    <div class="source"><strong>From John:</strong> physics is useful when you want the environment itself to determine motion—gravity, collision, bouncing, device orientation, and other simulated physical behavior.</div>
+    <div class="source"><strong>The video:</strong> physics is useful when you want the environment itself to determine motion—gravity, collision, bouncing, device orientation, and other simulated physical behavior.</div>
     <p>The general model is:</p>
     <div class="eq">m x⃗̈ = Σ F⃗<sub>i</sub></div>
     <ul>
@@ -291,7 +291,7 @@
 
   <section id="compose">
     <h2>8. Composition — the real sophistication</h2>
-    <div class="source"><strong>From John:</strong> the animation techniques are not isolated. His puzzle app combines gesture motion, particles, bounce, layout transitions, shaders, keyframed character motion, SVG masks, and Rive state-machine animation.</div>
+    <div class="source"><strong>The video:</strong> the animation techniques are not isolated. The puzzle app in the video combines gesture motion, particles, bounce, layout transitions, shaders, keyframed character motion, SVG masks, and Rive state-machine animation.</div>
     <p>Consider dragging a puzzle piece into place:</p>
     <ol>
       <li><strong>Gesture:</strong> the piece follows the pointer.</li>
@@ -322,7 +322,7 @@
 
   <section id="codex">
     <h2>10. Why this matters for Codex</h2>
-    <div class="source"><strong>From John:</strong> vague instructions such as “make animations” are insufficient for high-quality results. The human needs enough vocabulary and taste to steer the agent toward the right technique and then visually validate the output.</div>
+    <div class="source"><strong>The video:</strong> vague instructions such as “make animations” are insufficient for high-quality results. The human needs enough vocabulary and taste to steer the agent toward the right technique and then visually validate the output.</div>
     <p>A weak prompt:</p>
     <pre>Add some animations and make this feel premium.</pre>
     <p>A stronger prompt:</p>
