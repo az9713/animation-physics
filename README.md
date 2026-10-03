@@ -60,6 +60,7 @@ There is no build step and there are no packages to install. Download the files,
 
 ## Files
 
+- `index.html` redirects the site root, https://az9713.github.io/theory-of-animation/, to the demo.
 - `animation_demo.html` is the demo. It uses plain HTML, CSS, and JavaScript, with no libraries.
 - `animation_theory.html` is the theory page.
 - `assets/` holds the two preview images.

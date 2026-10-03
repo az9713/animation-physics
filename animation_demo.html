@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>John's Animation Demo — 13 Motion Combinations</title>
+<title>Animation Demo — 13 Motion Combinations</title>
 <style>
   :root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--soft:#cbd5e1;--muted:#94a3b8;--a1:#fb923c;--a2:#2dd4bf;--line:#334155;--code:#0b1220}
   *{box-sizing:border-box}
@@ -50,8 +50,8 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>John's Animation Demo</h1>
-  <p class="lede">One draggable character, Clawd. Thirteen animations: four single drivers (keyframes, spring, gesture, physics) and nine combinations. Each one has an explainer based on <a href="animation_theory.html">John's theory of animation</a>. Ask of each animation: what controls the next frame?</p>
+  <h1>Animation Demo</h1>
+  <p class="lede">One draggable character, Clawd. Thirteen animations: four single drivers (keyframes, spring, gesture, physics) and nine combinations. Each one has an explainer based on the <a href="animation_theory.html">theory of animation</a> page. Ask of each animation: what controls the next frame?</p>
   <nav id="nav"></nav>
   <div class="main">
     <div>
@@ -324,7 +324,7 @@ MODES.push({id:4,name:'Physics',drivers:'P',defaults:{e:.7,tilt:0},links:[['#phy
             {type:'button',label:'Drop',fn:()=>{S.x=HB+Math.random()*(SW-2*HB);S.y=HB+8;M.vx=(Math.random()-.5)*600;M.vy=0;M.on=true;}}],
   expl:`<p><span class="tag">Driver:</span> forces and constraints. You set the rules. The simulation produces the path.</p>
 <div class="eq">m·ẍ = ΣF &nbsp;&nbsp; F<sub>g</sub> = m·g &nbsp;&nbsp; v<sub>after</sub> = −e·v<sub>before</sub></div>
-<p>e = 0 gives no bounce. e ≈ 1 gives a highly elastic bounce. The tilt slider rotates the gravity vector: g<sub>screen</sub> = R(θ)·g. This is John's gyroscope example: the gravity direction changes, Clawd accelerates, the walls constrain it.</p>
+<p>e = 0 gives no bounce. e ≈ 1 gives a highly elastic bounce. The tilt slider rotates the gravity vector: g<sub>screen</sub> = R(θ)·g. This is the video's gyroscope example: the gravity direction changes, Clawd accelerates, the walls constrain it.</p>
 <p>Compare keyframes: there you author the trajectory. Here you author the rules, and the trajectory is simulated. A bounce slower than 30 px/s stops Clawd, to prevent jitter.</p>`,
   enter(){M.on=false;M.vx=0;M.vy=0;
     ov.innerHTML=`<line id="ga" x1="46" y1="46" stroke="#2dd4bf" stroke-width="3" stroke-linecap="round"/><circle id="gt" r="5" fill="#2dd4bf"/>`+txt(12,16,'gravity','start');},
