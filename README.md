@@ -10,14 +10,14 @@ The animation toolbox and composition ideas come from that video. This repositor
 
 | Page | What it is | Link |
 |---|---|---|
-| **Demo** | One draggable character (Clawd) and 13 animations, each with an explainer. | **[Open the live demo](https://az9713.github.io/theory-of-animation/animation_demo.html)** |
-| **Theory** | The written theory: what drives motion, the math, composition, and Codex prompting. | **[Open the live theory page](https://az9713.github.io/theory-of-animation/animation_theory.html)** |
+| **Demo** | One draggable character (Clawd) and 13 animations, each with an explainer. | **[Open the live demo](https://az9713.github.io/animation-physics/animation_demo.html)** |
+| **Theory** | The written theory: what drives motion, the math, composition, and Codex prompting. | **[Open the live theory page](https://az9713.github.io/animation-physics/animation_theory.html)** |
 
 GitHub does not run web pages inside a README. The images below are previews. Select an image to open the live page.
 
-[![Demo preview](assets/demo-preview.png)](https://az9713.github.io/theory-of-animation/animation_demo.html)
+[![Demo preview](assets/demo-preview.png)](https://az9713.github.io/animation-physics/animation_demo.html)
 
-[![Theory page preview](assets/theory-preview.png)](https://az9713.github.io/theory-of-animation/animation_theory.html)
+[![Theory page preview](assets/theory-preview.png)](https://az9713.github.io/animation-physics/animation_theory.html)
 
 ## The central question
 
@@ -60,7 +60,7 @@ There is no build step and there are no packages to install. Download the files,
 
 ## Files
 
-- `index.html` redirects the site root, https://az9713.github.io/theory-of-animation/, to the demo.
+- `index.html` redirects the site root, https://az9713.github.io/animation-physics/, to the demo.
 - `animation_demo.html` is the demo. It uses plain HTML, CSS, and JavaScript, with no libraries.
 - `animation_theory.html` is the theory page.
 - `assets/` holds the two preview images.
