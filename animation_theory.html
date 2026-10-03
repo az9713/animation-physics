@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>John's Theory of Animation — Motion Drivers, Composition, and Codex</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#121a2b;
+    --panel2:#0f1626;
+    --text:#e8edf7;
+    --muted:#a8b3c7;
+    --line:#26324a;
+    --accent:#8ab4ff;
+    --accent2:#b8f2d0;
+    --warn:#ffd28a;
+    --code:#0a0f1a;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background:linear-gradient(180deg,#08101f 0%, var(--bg) 20%, #0b1020 100%);
+    color:var(--text);
+    line-height:1.62;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:44px 24px 80px}
+  .hero{
+    padding:36px 0 26px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:30px;
+  }
+  h1{font-size:clamp(2.2rem,5vw,4rem);line-height:1.05;margin:.15em 0 .35em}
+  h2{font-size:1.8rem;margin-top:2.2em;border-top:1px solid var(--line);padding-top:1.25em}
+  h3{font-size:1.25rem;margin-top:1.7em}
+  p,li{font-size:1.02rem}
+  .lede{font-size:1.2rem;color:#cbd5e6;max-width:880px}
+  .kicker{color:var(--accent2);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem}
+  .card{
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:22px;
+    margin:18px 0;
+  }
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .mini{padding:18px}
+  .mini h3{margin-top:0}
+  table{width:100%;border-collapse:collapse;margin:18px 0;background:var(--panel2)}
+  th,td{border:1px solid var(--line);padding:12px 14px;text-align:left;vertical-align:top}
+  th{background:#152039}
+  code,pre{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  pre{
+    white-space:pre-wrap;
+    background:var(--code);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    overflow:auto;
+  }
+  .eq{
+    font-family:Cambria Math, STIX Two Math, serif;
+    font-size:1.18rem;
+    background:#0d1423;
+    border-left:3px solid var(--accent);
+    padding:12px 16px;
+    border-radius:8px;
+    overflow:auto;
+  }
+  .note{
+    border-left:4px solid var(--warn);
+    background:#1d1820;
+    padding:14px 16px;
+    border-radius:8px;
+    color:#f0dfc0;
+  }
+  .source{
+    border-left:4px solid var(--accent2);
+    background:#10201a;
+    padding:14px 16px;
+    border-radius:8px;
+    color:#d2f0dd;
+  }
+  .model{
+    border-left:4px solid var(--accent);
+    background:#101927;
+    padding:14px 16px;
+    border-radius:8px;
+    color:#d8e6ff;
+  }
+  .flow{
+    text-align:center;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:1rem;
+    background:var(--code);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+  }
+  .toc a{color:var(--accent);text-decoration:none}
+  .toc li{margin:.25em 0}
+  .pill{
+    display:inline-block;padding:4px 9px;border:1px solid var(--line);border-radius:999px;
+    color:var(--muted);font-size:.86rem;margin-right:6px
+  }
+  footer{margin-top:48px;color:var(--muted);font-size:.9rem;border-top:1px solid var(--line);padding-top:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker">Animation Theory for AI-Assisted App Building</div>
+    <h1>John's Theory of Animation</h1>
+    <p class="lede">
+      A compact theory of what drives motion in software: keyframes, springs, gestures, and physics;
+      how they differ mathematically; how they compose; and why this matters when steering Codex.
+    </p>
+    <span class="pill">Source-derived concepts</span>
+    <span class="pill">Mathematical formalization</span>
+    <span class="pill">Codex prompting implications</span>
+  </header>
+
+  <section class="card toc">
+    <h3 style="margin-top:0">Contents</h3>
+    <ol>
+      <li><a href="#driver">What drives the motion?</a></li>
+      <li><a href="#keyframes">Keyframes — choose values and timing</a></li>
+      <li><a href="#springs">Springs — respond, then settle</a></li>
+      <li><a href="#easing">Easing — shape velocity over time</a></li>
+      <li><a href="#gestures">Gestures — follow the user</a></li>
+      <li><a href="#gesture-spring">Gesture + spring</a></li>
+      <li><a href="#physics">Physics — simulate forces and collisions</a></li>
+      <li><a href="#compose">Composition — combine multiple motion drivers</a></li>
+      <li><a href="#taxonomy">Unified taxonomy</a></li>
+      <li><a href="#codex">Implications for Codex</a></li>
+      <li><a href="#mental-model">Compact mental model</a></li>
+    </ol>
+  </section>
+
+  <section id="driver">
+    <h2>1. What drives the motion?</h2>
+    <div class="source"><strong>From John:</strong> animation techniques differ by what controls the object's motion. He introduces keyframes, spring/easing behavior, gestures, and physics, and emphasizes that these techniques can be combined.</div>
+    <p>A useful formalization is to represent the visual state of an element at time <em>t</em> as:</p>
+    <div class="eq">x(t) = state of the visual element at time t</div>
+    <p>The state may include position, rotation, scale, opacity, color, shape, velocity, or deformation.</p>
+    <p>The central question is therefore:</p>
+    <div class="card"><strong>What rule determines the next visual state x(t)?</strong></div>
+    <p>Each animation family answers that question differently.</p>
+  </section>
+
+  <section id="keyframes">
+    <h2>2. Keyframes — choose values and timing</h2>
+    <div class="source"><strong>From John:</strong> keyframes are appropriate when you want an authored sequence: define positions, sizes, opacity, color, or shape at selected times, and let the framework interpolate between them.</div>
+    <p>Suppose horizontal position is represented by <em>x(t)</em>. You may specify:</p>
+    <div class="eq">x(0) = 0,&nbsp;&nbsp; x(1) = 100,&nbsp;&nbsp; x(2.4) = 50</div>
+    <p>More generally:</p>
+    <div class="eq">x(t<sub>i</sub>) = x<sub>i</sub></div>
+    <p>where <em>t<sub>i</sub></em> is a chosen keyframe time and <em>x<sub>i</sub></em> is the chosen value. The animation system fills in the states between keyframes.</p>
+    <p>A UI element can be modeled as a vector:</p>
+    <div class="eq">x⃗(t) = [ p<sub>x</sub>(t), p<sub>y</sub>(t), s(t), θ(t), α(t) ]ᵀ</div>
+    <ul>
+      <li><strong>p<sub>x</sub>, p<sub>y</sub></strong>: position</li>
+      <li><strong>s</strong>: scale</li>
+      <li><strong>θ</strong>: rotation</li>
+      <li><strong>α</strong>: opacity</li>
+    </ul>
+    <h3>Best use case</h3>
+    <p>Use keyframes when you know the choreography in advance.</p>
+    <pre>0.0 s   character idle
+0.3 s   raises coffee cup
+0.8 s   cup reaches mouth
+1.2 s   pause
+1.7 s   lowers cup
+2.0 s   returns to idle</pre>
+    <div class="model"><strong>Model:</strong> you specify where and when; the software fills in the path.</div>
+  </section>
+
+  <section id="springs">
+    <h2>3. Springs — respond, then settle</h2>
+    <div class="source"><strong>From John:</strong> spring motion is useful for UI elements such as buttons and other responsive interactions. Different parameter choices can make motion feel gentle, snappy, or bouncy.</div>
+    <p>Instead of specifying all intermediate positions, a spring animation typically defines a destination and the dynamics of how the object approaches it.</p>
+    <div class="eq">m ẍ + c ẋ + k(x − x<sub>target</sub>) = 0</div>
+    <ul>
+      <li><strong>x</strong>: current position</li>
+      <li><strong>x<sub>target</sub></strong>: destination</li>
+      <li><strong>m</strong>: effective mass</li>
+      <li><strong>c</strong>: damping</li>
+      <li><strong>k</strong>: spring stiffness</li>
+      <li><strong>ẋ</strong>: velocity</li>
+      <li><strong>ẍ</strong>: acceleration</li>
+    </ul>
+    <div class="note">This differential-equation formalization is added here for rigor; John discusses the behavior conceptually rather than writing this equation.</div>
+    <p>A linear transition might look like:</p>
+    <pre>0 → 20 → 40 → 60 → 80 → 100</pre>
+    <p>A spring might look like:</p>
+    <pre>0 → 45 → 85 → 108 → 96 → 101 → 100</pre>
+    <p>The overshoot and settling produce a sense of momentum, weight, and elasticity.</p>
+    <h3>Why springs feel natural</h3>
+    <p>Human perception notices abrupt starts and stops. Spring dynamics naturally generate acceleration and deceleration, so they work well for buttons, modals, cards, snapping, and drag-release interactions.</p>
+  </section>
+
+  <section id="easing">
+    <h2>4. Easing — shape velocity over time</h2>
+    <div class="source"><strong>From John:</strong> easing functions determine how an animation accelerates and decelerates, and they substantially change how an interaction feels.</div>
+    <p>For a transition from point <em>A</em> to point <em>B</em>, use an easing function <em>E(t)</em>:</p>
+    <div class="eq">x(t) = A + (B − A) E(t)</div>
+    <p>Examples:</p>
+    <div class="grid">
+      <div class="card mini"><h3>Linear</h3><div class="eq">E(t) = t</div><p>Constant speed.</p></div>
+      <div class="card mini"><h3>Ease-in</h3><p>Slow start, faster finish.</p></div>
+      <div class="card mini"><h3>Ease-out</h3><p>Fast start, slow finish.</p></div>
+      <div class="card mini"><h3>Ease-in-out</h3><p>Slow → fast → slow.</p></div>
+    </div>
+    <div class="model"><strong>Distinction:</strong> easing prescribes the timing curve of a transition; a spring models a dynamical system that settles toward equilibrium.</div>
+  </section>
+
+  <section id="gestures">
+    <h2>5. Gestures — follow the user</h2>
+    <div class="source"><strong>From John:</strong> gesture-driven motion depends on where the cursor, finger, or hand moves. This makes objects feel draggable, responsive, and alive.</div>
+    <p>With keyframes:</p>
+    <div class="eq">x(t) = f(t)</div>
+    <p>Motion depends primarily on time.</p>
+    <p>With gesture input:</p>
+    <div class="eq">x(t) = f(u(t))</div>
+    <p>where <em>u(t)</em> is the user's pointer or finger state.</p>
+    <p>The simplest implementation is:</p>
+    <div class="eq">x<sub>object</sub>(t) = x<sub>pointer</sub>(t)</div>
+    <p>A softened follower can introduce lag:</p>
+    <div class="eq">x<sub>object</sub>(t) = (1 − λ)x<sub>object</sub>(t − Δt) + λx<sub>pointer</sub>(t)</div>
+    <ul>
+      <li><strong>λ</strong>: responsiveness parameter</li>
+      <li>smaller <strong>λ</strong>: softer, more delayed following</li>
+      <li>larger <strong>λ</strong>: tighter tracking</li>
+    </ul>
+    <div class="model"><strong>Key idea:</strong> gesture animation is input-driven rather than timeline-driven.</div>
+  </section>
+
+  <section id="gesture-spring">
+    <h2>6. Gesture + spring</h2>
+    <div class="source"><strong>From John:</strong> the original iPhone-style fling is an example where a gesture establishes motion and spring-like behavior or overshoot determines how the interface settles.</div>
+    <div class="flow">finger moves → object follows → finger released → infer release velocity → spring/momentum motion → settle</div>
+    <p>At release:</p>
+    <div class="eq">x(t<sub>release</sub>) = x<sub>r</sub>,&nbsp;&nbsp; ẋ(t<sub>release</sub>) = v<sub>r</sub></div>
+    <p>The spring or inertial system then begins with these initial conditions. This preserves continuity between the user's physical action and the subsequent software motion.</p>
+  </section>
+
+  <section id="physics">
+    <h2>7. Physics — simulate forces and collisions</h2>
+    <div class="source"><strong>From John:</strong> physics is useful when you want the environment itself to determine motion—gravity, collision, bouncing, device orientation, and other simulated physical behavior.</div>
+    <p>The general model is:</p>
+    <div class="eq">m x⃗̈ = Σ F⃗<sub>i</sub></div>
+    <ul>
+      <li><strong>m</strong>: mass</li>
+      <li><strong>x⃗</strong>: position</li>
+      <li><strong>x⃗̈</strong>: acceleration</li>
+      <li><strong>F⃗<sub>i</sub></strong>: forces acting on the object</li>
+    </ul>
+    <p>For gravity:</p>
+    <div class="eq">F⃗<sub>g</sub> = m g⃗</div>
+    <p>For a simple one-dimensional bounce:</p>
+    <div class="eq">v<sub>after</sub> = −e v<sub>before</sub></div>
+    <p>where <em>e</em> is the coefficient of restitution:</p>
+    <ul>
+      <li><strong>e = 0</strong>: no bounce</li>
+      <li><strong>e ≈ 1</strong>: highly elastic bounce</li>
+    </ul>
+
+    <h3>Keyframes vs. physics</h3>
+    <table>
+      <thead><tr><th>Keyframes</th><th>Physics</th></tr></thead>
+      <tbody>
+        <tr><td>Specify motion directly.</td><td>Specify rules that generate motion.</td></tr>
+        <tr><td>Good for choreography.</td><td>Good for emergent interaction.</td></tr>
+        <tr><td>Trajectory is authored.</td><td>Trajectory is simulated.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>John's device-orientation example</h3>
+    <p>If a phone's gyroscope changes the orientation of gravity in screen coordinates:</p>
+    <div class="eq">g⃗<sub>screen</sub> = R(θ) g⃗</div>
+    <ul>
+      <li><strong>R(θ)</strong>: rotation induced by device orientation</li>
+      <li><strong>g⃗</strong>: gravity vector</li>
+    </ul>
+    <div class="flow">gyroscope → gravity direction changes → object accelerates → collisions constrain it → object rolls/bounces</div>
+  </section>
+
+  <section id="compose">
+    <h2>8. Composition — the real sophistication</h2>
+    <div class="source"><strong>From John:</strong> the animation techniques are not isolated. His puzzle app combines gesture motion, particles, bounce, layout transitions, shaders, keyframed character motion, SVG masks, and Rive state-machine animation.</div>
+    <p>Consider dragging a puzzle piece into place:</p>
+    <ol>
+      <li><strong>Gesture:</strong> the piece follows the pointer.</li>
+      <li><strong>Spring:</strong> after release near the destination, it snaps and settles into place.</li>
+      <li><strong>Particles:</strong> sparkles or confetti signal completion.</li>
+      <li><strong>Layout transition:</strong> the finished board rearranges.</li>
+      <li><strong>Keyframed reaction:</strong> a character celebrates and returns to idle.</li>
+    </ol>
+    <div class="flow">gesture → spring → particles → layout transition → keyframed reaction</div>
+    <p>The perceived polish comes from coherent composition of small effects rather than from one oversized animation.</p>
+  </section>
+
+  <section id="taxonomy">
+    <h2>9. Unified taxonomy: where does motion information come from?</h2>
+    <table>
+      <thead>
+        <tr><th>Technique</th><th>Primary driver</th><th>Formal view</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Keyframes</td><td>Author</td><td>x(t) = f(t; θ<sub>author</sub>)</td></tr>
+        <tr><td>Springs</td><td>Target state + dynamics</td><td>ẍ = f(x, ẋ, x<sub>target</sub>)</td></tr>
+        <tr><td>Gestures</td><td>User input</td><td>x(t) = f(u(t))</td></tr>
+        <tr><td>Physics</td><td>Forces + constraints</td><td>ẍ = f(F⃗, x, ẋ)</td></tr>
+      </tbody>
+    </table>
+    <div class="card"><strong>Decision rule:</strong> ask, “What should control the next frame?” The answer usually identifies the correct animation primitive.</div>
+  </section>
+
+  <section id="codex">
+    <h2>10. Why this matters for Codex</h2>
+    <div class="source"><strong>From John:</strong> vague instructions such as “make animations” are insufficient for high-quality results. The human needs enough vocabulary and taste to steer the agent toward the right technique and then visually validate the output.</div>
+    <p>A weak prompt:</p>
+    <pre>Add some animations and make this feel premium.</pre>
+    <p>A stronger prompt:</p>
+    <pre>While dragging, bind the piece to pointer position.
+
+On release inside the valid drop zone:
+1. spring it to the slot with slight overshoot,
+2. emit a short particle burst when it settles,
+3. transition the completed row into its new layout,
+4. trigger a short character celebration,
+5. return the character to its resting state.</pre>
+    <p>This prompt has an explicit causal structure:</p>
+    <div class="flow">gesture → spring → particles → layout transition → state-machine reaction</div>
+    <div class="model"><strong>Core principle:</strong> do not ask the agent only for an aesthetic outcome. Specify the motion driver, the transition logic, the intended feel, and the composition of effects.</div>
+  </section>
+
+  <section id="mental-model">
+    <h2>11. Compact mental model</h2>
+    <div class="grid">
+      <div class="card mini"><h3>Keyframes</h3><p><strong>Question:</strong> Do I know the choreography in advance?</p></div>
+      <div class="card mini"><h3>Springs</h3><p><strong>Question:</strong> Should this react and naturally settle?</p></div>
+      <div class="card mini"><h3>Gestures</h3><p><strong>Question:</strong> Should the user's movement directly control it?</p></div>
+      <div class="card mini"><h3>Physics</h3><p><strong>Question:</strong> Should behavior emerge from forces, collisions, or constraints?</p></div>
+    </div>
+    <div class="card">
+      <strong>John's broader lesson:</strong> the quality jump comes from understanding these primitives well enough to compose them deliberately, then using Codex to execute the implementation rather than asking Codex to invent taste from scratch.
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Source basis:</strong> John's transcript sections “The animation toolbox,” “Composing animations,” and “Using Codex computer use with Rive.” Mathematical equations and the unified taxonomy are explicit formalizations added to clarify John's conceptual framework.</p>
+  </footer>
+</div>
+</body>
+</html>

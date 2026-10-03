@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>John's Animation Demo — 13 Motion Combinations</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--soft:#cbd5e1;--muted:#94a3b8;--a1:#fb923c;--a2:#2dd4bf;--line:#334155;--code:#0b1220}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 60px}
+  h1{font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.1;margin:0 0 8px}
+  h2{font-size:1.3rem;margin:0}
+  .lede{color:var(--soft);max-width:860px;margin:0 0 18px}
+  a{color:var(--a2)}
+  nav{display:grid;gap:8px;margin-bottom:18px}
+  .grp{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .grp>span{color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;min-width:110px}
+  button,select{font:inherit;font-size:.9rem;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:5px 12px;cursor:pointer}
+  button:hover,select:hover{border-color:var(--a2)}
+  nav button[aria-pressed=true]{background:var(--a1);color:#0f172a;border-color:var(--a1);font-weight:700}
+  .main{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;align-items:start}
+  @media(max-width:900px){.main{grid-template-columns:1fr}}
+  #stage{position:relative;height:440px;overflow:hidden;border:1px solid var(--line);border-radius:14px;touch-action:none;user-select:none;-webkit-user-select:none;
+    background-color:var(--card);
+    background-image:linear-gradient(#334155 1px,transparent 1px),linear-gradient(90deg,#334155 1px,transparent 1px);
+    background-size:40px 40px;background-position:-1px -1px;box-shadow:inset 0 0 0 1000px rgba(15,23,42,.55)}
+  @media(max-width:600px){#stage{height:340px}}
+  #ov,#dots{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  #box{position:absolute;left:0;top:0;width:64px;height:64px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.45));will-change:transform}
+  #box svg{display:block;width:100%;height:100%;shape-rendering:crispEdges}
+  #stage.drag #box{cursor:grab}
+  #stage.held #box{cursor:grabbing}
+  .dot{position:absolute;left:0;top:0;width:8px;height:8px;border-radius:50%}
+  #read{font:.82rem/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--muted);padding:10px 4px;min-height:3.4em}
+  .hint{color:var(--muted);font-size:.85rem;margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+  .pill{display:inline-block;padding:2px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:.8rem;margin:0 6px 4px 0}
+  .pill.on{color:#0f172a;background:var(--a2);border-color:var(--a2);font-weight:700}
+  #ctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin:12px 0}
+  #ctl label{font-size:.88rem;color:var(--soft);display:flex;align-items:center;gap:6px}
+  #ctl output{color:var(--a1);min-width:3.2em;font-family:ui-monospace,Consolas,monospace;font-size:.85rem}
+  #expl p{margin:.5em 0;color:var(--soft);font-size:.95rem}
+  .tag{color:var(--a1);font-weight:700}
+  .eq{font-family:"Cambria Math","STIX Two Math",serif;font-size:1.05rem;background:var(--code);border-left:3px solid var(--a1);padding:8px 12px;border-radius:8px;margin:8px 0;overflow:auto}
+  .links{margin-top:10px;font-size:.88rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>John's Animation Demo</h1>
+  <p class="lede">One draggable character, Clawd. Thirteen animations: four single drivers (keyframes, spring, gesture, physics) and nine combinations. Each one has an explainer based on <a href="animation_theory.html">John's theory of animation</a>. Ask of each animation: what controls the next frame?</p>
+  <nav id="nav"></nav>
+  <div class="main">
+    <div>
+      <div id="stage">
+        <svg id="ov" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="box"><!-- Clawd: pixel body, two arms, four legs, two eyes; fits the 64 px physics box -->
+          <svg viewBox="0 10 64 40" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg" aria-label="Clawd">
+            <g fill="#d97757">
+              <rect x="8" y="12" width="48" height="30"/>
+              <rect x="2" y="24" width="6" height="8"/><rect x="56" y="24" width="6" height="8"/>
+              <rect x="14" y="42" width="5" height="8"/><rect x="22" y="42" width="5" height="8"/>
+              <rect x="37" y="42" width="5" height="8"/><rect x="45" y="42" width="5" height="8"/>
+            </g>
+            <g fill="#1a1410"><rect x="19" y="20" width="5" height="9"/><rect x="40" y="20" width="5" height="9"/></g>
+          </svg>
+        </div>
+        <div id="dots"></div>
+      </div>
+      <div id="read"></div>
+      <p class="hint">Drag Clawd where an animation allows it. Click the stage in the spring animation. Press Reset to restart the current animation.</p>
+    </div>
+    <div class="card" id="panel">
+      <div class="top"><h2 id="mtitle"></h2><button id="reset">Reset</button></div>
+      <div id="pills"></div>
+      <div id="ctl"></div>
+      <div id="expl"></div>
+      <div class="links" id="links"></div>
+    </div>
+  </div>
+</div>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const stage=$('#stage'), box=$('#box'), ov=$('#ov'), dotsEl=$('#dots'), readEl=$('#read');
+const HB=32, DT=1/120, G=1400, REST=30, SNAP=150;
+let SW=0, SH=0, cur=1, M={}, mode=null;
+const S={x:0,y:0,rot:0,sx:1,sy:1,oy:0};            // visual state of Clawd (center coordinates)
+const P={down:false,x:0,y:0,ox:0,oy:0,samples:[]}; // pointer target (box center) and recent samples
+const C={ease:'ease-in-out',preset:'bouncy',follow:'direct',lambda:0.15,e:0.7,tilt:0,k:16,c:2,kon:true};
+const PRESETS={gentle:{z:1,w:6},snappy:{z:0.85,w:24},bouncy:{z:0.25,w:12}};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f0=v=>Math.round(v), f1=v=>v.toFixed(1), f2=v=>v.toFixed(2);
+
+/* ---- keyframes and easing ---- */
+const EASE={'linear':u=>u,'ease-in':u=>u*u*u,'ease-out':u=>1-Math.pow(1-u,3),
+  'ease-in-out':u=>u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2};
+function kf(fr,t,key,E=EASE.linear){
+  if(t<=fr[0].t) return fr[0][key];
+  for(let i=1;i<fr.length;i++){
+    const a=fr[i-1], b=fr[i];
+    if(t<=b.t){ const u=(t-a.t)/(b.t-a.t); return a[key]+(b[key]-a[key])*E(u); }
+  }
+  return fr[fr.length-1][key];
+}
+const KF1=[{t:0,x:0,rot:0,s:1},{t:1,x:100,rot:Math.PI,s:1.3},{t:2.4,x:50,rot:2*Math.PI,s:1}];
+const KF2=[{t:0,x:.15,y:.2},{t:.8,x:.85,y:.2},{t:1.6,x:.85,y:.8},{t:2.4,x:.15,y:.8},{t:3.2,x:.15,y:.2}];
+const KF8=[{t:0,rot:0,s:1},{t:1,rot:Math.PI,s:1.3},{t:2,rot:2*Math.PI,s:1}];
+const pathAt=t=>({x:HB+(SW-2*HB)*kf(KF2,t,'x'), y:HB+(SH-2*HB)*kf(KF2,t,'y')});
+
+/* ---- spring ---- */
+const sprP=()=>{const p=PRESETS[C.preset];return {m:1,k:p.w*p.w,c:2*p.z*p.w,z:p.z,w:p.w};};
+function stepSpring(a,t,p,dt){ a.v+=(-p.k*(a.x-t)-p.c*a.v)/p.m*dt; a.x+=a.v*dt; }
+const settled=(a,t)=>Math.abs(a.x-t)<1.5&&Math.abs(a.v)<15;
+function confine(a,lo,hi){
+  if(a.x<lo){a.x=lo;if(a.v<0)a.v=0;} else if(a.x>hi){a.x=hi;if(a.v>0)a.v=0;}
+}
+function springStep2(target,p,dt){
+  stepSpring(M.sx,target.x,p,dt); stepSpring(M.sy,target.y,p,dt);
+  confine(M.sx,HB,SW-HB); confine(M.sy,HB,SH-HB);
+  S.x=M.sx.x; S.y=M.sy.x;
+}
+
+/* ---- physics: M.vx, M.vy are the velocity; returns the floor impact speed ---- */
+const bounce=(v,e)=>{const r=-e*v;return Math.abs(r)<REST?0:r;};
+function bodyStep(dt,ax,ay,e){
+  M.vx+=ax*dt; M.vy+=ay*dt; S.x+=M.vx*dt; S.y+=M.vy*dt;
+  let floor=0;
+  if(S.x<HB){S.x=HB;M.vx=bounce(M.vx,e);} else if(S.x>SW-HB){S.x=SW-HB;M.vx=bounce(M.vx,e);}
+  if(S.y<HB){S.y=HB;M.vy=bounce(M.vy,e);} else if(S.y>SH-HB){S.y=SH-HB;floor=Math.abs(M.vy);M.vy=bounce(M.vy,e);}
+  return floor;
+}
+function tetherStep(dt,e){ // spring to anchor M.A + damping + gravity
+  const A=M.A;
+  bodyStep(dt,-C.k*(S.x-A.x)-C.c*M.vx,-C.k*(S.y-A.y)-C.c*M.vy+G,e);
+}
+function zig(ax,ay,bx,by,n=10,amp=9){
+  const dx=bx-ax,dy=by-ay,L=Math.hypot(dx,dy)||1,nx=-dy/L,ny=dx/L,lead=.12;
+  let d=`M${ax},${ay}`;
+  for(let i=1;i<=n;i++){const f=lead+(1-2*lead)*(i-.5)/n,s=i%2?1:-1;d+=` L${ax+dx*f+nx*amp*s},${ay+dy*f+ny*amp*s}`;}
+  return d+` L${bx},${by}`;
+}
+
+/* ---- SVG overlay helpers ---- */
+const svgRect=(id,x,y,extra='')=>`<rect id="${id}" x="${x-HB}" y="${y-HB}" width="${2*HB}" height="${2*HB}" rx="14" fill="none" stroke="#94a3b8" stroke-dasharray="6 5" ${extra}/>`;
+const txt=(x,y,s,anchor='middle')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="#94a3b8" font-size="12">${s}</text>`;
+const q=id=>ov.querySelector('#'+id);
+const PRESET_CTL={type:'select',id:'preset',label:'Spring preset',opts:Object.keys(PRESETS)};
+const E_CTL={type:'range',id:'e',label:'Restitution e',min:0,max:1,step:.05};
+
+/* ---- pointer / gesture ---- */
+function releaseVel(){
+  const now=performance.now(), s=P.samples.filter(a=>now-a.t<=100);
+  if(s.length<2||now-s[s.length-1].t>80) return [0,0];
+  const a=s[0], b=s[s.length-1], dt=(b.t-a.t)/1000;
+  if(dt<.005) return [0,0];
+  let vx=(b.x-a.x)/dt, vy=(b.y-a.y)/dt; const m=Math.hypot(vx,vy);
+  if(m>3000){vx*=3000/m;vy*=3000/m;}
+  return [vx,vy];
+}
+const local=e=>{const r=stage.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];};
+stage.addEventListener('pointerdown',e=>{
+  const [px,py]=local(e);
+  if(mode.stageClick) mode.stageClick(px,py);
+  if(!mode.drag||(mode.canGrab&&!mode.canGrab())) return;
+  if(Math.abs(px-S.x)<=HB*1.2&&Math.abs(py-(S.y+S.oy))<=HB*1.2){
+    P.down=true; P.ox=S.x-px; P.oy=S.y-py; P.x=S.x; P.y=S.y;
+    P.samples=[{t:performance.now(),x:P.x,y:P.y}];
+    stage.setPointerCapture(e.pointerId); stage.classList.add('held');
+    if(mode.onGrab) mode.onGrab();
+    e.preventDefault();
+  }
+});
+stage.addEventListener('pointermove',e=>{
+  if(!P.down) return;
+  const [px,py]=local(e);
+  P.x=clamp(px+P.ox,HB,SW-HB); P.y=clamp(py+P.oy,HB,SH-HB);
+  P.samples.push({t:performance.now(),x:P.x,y:P.y}); if(P.samples.length>12) P.samples.shift();
+});
+function endDrag(){
+  if(!P.down) return;
+  P.down=false; stage.classList.remove('held');
+  const [vx,vy]=releaseVel(); if(mode.onRelease) mode.onRelease(vx,vy);
+}
+stage.addEventListener('pointerup',endDrag);
+stage.addEventListener('pointercancel',endDrag);
+
+/* ---- UI ---- */
+const fmt=v=>String(+(+v).toFixed(2));
+function buildControls(){
+  const el=$('#ctl'); el.innerHTML='';
+  for(const s of mode.controls||[]){
+    if(s.type==='button'){const b=document.createElement('button');b.textContent=s.label;b.onclick=()=>s.fn(b);el.appendChild(b);continue;}
+    const w=document.createElement('label'); w.append(s.label);
+    if(s.type==='select'){
+      const sel=document.createElement('select');
+      for(const o of s.opts) sel.add(new Option(o,o));
+      sel.value=C[s.id]; sel.onchange=()=>{C[s.id]=sel.value;}; w.append(sel);
+    }else if(s.type==='range'){
+      const r=document.createElement('input'),o=document.createElement('output');
+      r.type='range'; r.min=s.min; r.max=s.max; r.step=s.step; r.value=C[s.id]; o.textContent=fmt(C[s.id])+(s.unit||'');
+      r.oninput=()=>{C[s.id]=+r.value;o.textContent=fmt(+r.value)+(s.unit||'');}; w.append(r,o);
+    }else if(s.type==='check'){
+      const c=document.createElement('input'); c.type='checkbox'; c.checked=!!C[s.id]; c.onchange=()=>{C[s.id]=c.checked;}; w.prepend(c);
+    }
+    el.appendChild(w);
+  }
+}
+function buildPanel(){
+  $('#mtitle').textContent=`${mode.id}. ${mode.name}`;
+  const names={K:'Keyframes',S:'Spring',G:'Gesture',P:'Physics'};
+  $('#pills').innerHTML=Object.keys(names).map(k=>`<span class="pill${mode.drivers.includes(k)?' on':''}">${names[k]}</span>`).join('');
+  $('#expl').innerHTML=mode.expl;
+  $('#links').innerHTML='Theory page: '+mode.links.map(([h,l])=>`<a href="animation_theory.html${h}">${l}</a>`).join(' · ');
+}
+function buildNav(){
+  const groups=[['A · Individual',1,4],['B · Pairs',5,10],['C · Triples',11,12],['D · All four',13,13]];
+  $('#nav').innerHTML=groups.map(([g,a,b])=>`<div class="grp"><span>${g}</span>`+
+    MODES.slice(a-1,b).map(m=>`<button data-m="${m.id}" aria-pressed="false">${m.id} ${m.name}</button>`).join('')+`</div>`).join('');
+  $('#nav').onclick=e=>{const b=e.target.closest('button[data-m]');if(b)setMode(+b.dataset.m);};
+}
+function measure(){
+  SW=stage.clientWidth; SH=stage.clientHeight;
+  ov.setAttribute('viewBox',`0 0 ${SW} ${SH}`);
+}
+function setMode(i){
+  cur=i; mode=MODES[i-1]; Object.assign(C,mode.defaults||{});
+  measure(); dotsEl.innerHTML=''; ov.innerHTML=''; M={};
+  Object.assign(S,{x:SW/2,y:SH/2,rot:0,sx:1,sy:1,oy:0});
+  P.down=false; P.x=S.x; P.y=S.y; P.samples=[];
+  stage.classList.remove('held'); stage.classList.toggle('drag',!!mode.drag);
+  mode.enter(); buildControls(); buildPanel();
+  document.querySelectorAll('#nav button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.m===i)));
+  location.hash=i; // history.replaceState throws a logged SecurityError on file:// pages
+}
+$('#reset').onclick=()=>setMode(cur);
+let lastW=0,lastH=0;
+window.addEventListener('resize',()=>{
+  if(stage.clientWidth!==lastW||stage.clientHeight!==lastH){lastW=stage.clientWidth;lastH=stage.clientHeight;setMode(cur);}
+});
+
+/* ---- loop: fixed step, dt clamped to 0.1 s so a background tab cannot blow up the simulation ---- */
+function render(){
+  box.style.transform=`translate(${S.x-HB}px,${S.y+S.oy-HB}px) rotate(${S.rot}rad) scale(${S.sx},${S.sy})`;
+}
+let last=performance.now(), acc=0;
+function frame(now){
+  const dt=Math.min((now-last)/1000,0.1); last=now; acc+=dt;
+  while(acc>=DT){ mode.step(DT); acc-=DT; }
+  if(mode.draw) mode.draw();
+  render();
+  readEl.textContent=mode.readout?mode.readout():'';
+  requestAnimationFrame(frame);
+}
+
+const MODES=[];
+/* 1 Keyframes */
+const px1=v=>HB+(SW-2*HB)*v/100;
+MODES.push({id:1,name:'Keyframes',drivers:'K',links:[['#keyframes','Keyframes'],['#easing','Easing']],
+  controls:[{type:'select',id:'ease',label:'Easing E(t)',opts:Object.keys(EASE)},
+            {type:'button',label:'Play',fn:()=>{M.kt=0;M.play=true;}}],
+  expl:`<p><span class="tag">Driver:</span> the author. You choose values and times. The software fills in the states between them.</p>
+<div class="eq">x(t<sub>i</sub>) = x<sub>i</sub> &nbsp;&nbsp; x(t) = f(t; θ<sub>author</sub>)</div>
+<p>Clawd uses x(0)=0, x(1)=100, x(2.4)=50, scaled to pixels. Rotation and scale also have keyframes, so the state is a vector: [p<sub>x</sub>, p<sub>y</sub>, s, θ, α]ᵀ.</p>
+<p>The easing menu changes only E(t) in x(t) = A + (B − A)·E(t). The keyframe values stay the same. John: use keyframes when you know the choreography in advance.</p>`,
+  enter(){
+    M.kt=0; M.play=false;
+    ov.innerHTML=[[0,0],[100,1],[50,2.4]].map(([v,t])=>{const x=px1(v);
+      return `<line x1="${x}" x2="${x}" y1="${SH/2-70}" y2="${SH/2+70}" stroke="#334155" stroke-dasharray="4 4"/>`+
+             txt(clamp(x,56,SW-56),SH/2+88,`t=${t} s → x=${v}`);}).join('');
+    MODES[0].step(0);
+  },
+  step(dt){
+    if(M.play){M.kt+=dt;if(M.kt>=2.4){M.kt=2.4;M.play=false;}}
+    const E=EASE[C.ease];
+    S.x=px1(kf(KF1,M.kt,'x',E)); S.y=SH/2; S.rot=kf(KF1,M.kt,'rot',E); S.sx=S.sy=kf(KF1,M.kt,'s',E);
+  },
+  readout(){return `t=${f2(M.kt)} s   x=${f1(kf(KF1,M.kt,'x',EASE[C.ease]))} (0–100 scale)   easing=${C.ease}   ${M.play?'playing':'press Play'}`;}
+});
+
+/* 2 Spring */
+MODES.push({id:2,name:'Spring',drivers:'S',defaults:{preset:'bouncy'},links:[['#springs','Springs']],
+  controls:[PRESET_CTL],
+  expl:`<p><span class="tag">Driver:</span> a target state plus dynamics. You give a destination. The spring decides the path.</p>
+<div class="eq">m·ẍ + c·ẋ + k(x − x<sub>target</sub>) = 0</div>
+<p>Click the stage to move the target. Each preset sets a damping ratio ζ and a natural frequency ω, with m = 1, k = mω², c = 2ζmω. The readout shows the values. Gentle: ζ=1, ω=6. Snappy: ζ=0.85, ω=24. Bouncy: ζ=0.25, ω=12.</p>
+<p>A linear transition is 0 → 20 → 40 → 60 → 80 → 100. A spring is like 0 → 45 → 85 → 108 → 96 → 101 → 100. John: springs suit buttons and responsive interactions. He describes the behavior in words. The equation comes from the theory page, which adds it.</p>`,
+  enter(){
+    S.x=SW*.25; S.y=SH/2; M.tx=SW*.7; M.ty=SH/2;
+    M.sx={x:S.x,v:0}; M.sy={x:S.y,v:0};
+    ov.innerHTML=`<circle id="tgt" r="9" fill="#2dd4bf"/>`+txt(SW/2,SH-14,'click anywhere to move the target');
+  },
+  stageClick(px,py){M.tx=clamp(px,HB,SW-HB);M.ty=clamp(py,HB,SH-HB);},
+  step(dt){springStep2({x:M.tx,y:M.ty},sprP(),dt);},
+  draw(){q('tgt').setAttribute('cx',M.tx);q('tgt').setAttribute('cy',M.ty);},
+  readout(){const p=sprP();return `m=1  c=${f2(p.c)}  k=${f0(p.k)}  ζ=${p.z}  ω=${p.w} rad/s   distance to target=${f0(Math.hypot(S.x-M.tx,S.y-M.ty))} px`;}
+});
+
+/* 3 Gesture */
+MODES.push({id:3,name:'Gesture',drivers:'G',drag:true,defaults:{follow:'direct',lambda:0.15},links:[['#gestures','Gestures']],
+  controls:[{type:'select',id:'follow',label:'Follow',opts:['direct','lag']},
+            {type:'range',id:'lambda',label:'λ (per 1/60 s)',min:.02,max:1,step:.01}],
+  expl:`<p><span class="tag">Driver:</span> the user's input. Time does not move Clawd. If you hold the pointer still, Clawd stays still.</p>
+<div class="eq">x(t) = f(u(t)) &nbsp;&nbsp; x<sub>object</sub> = x<sub>pointer</sub></div>
+<div class="eq">x<sub>object</sub>(t) = (1 − λ)·x<sub>object</sub>(t − Δt) + λ·x<sub>pointer</sub>(t)</div>
+<p>Direct follow copies the pointer. Lag follow uses λ. A smaller λ gives softer, later following. A larger λ gives tighter tracking. Here λ is defined per 1/60 s, so the feel does not depend on the display refresh rate. The dashed ring and the dot show the pointer target. They appear only in lag mode.</p>
+<p>John: gesture animation is input-driven, not timeline-driven.</p>`,
+  enter(){ov.innerHTML=`<circle id="ptr" r="46" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-dasharray="6 5"/><circle id="pdot" r="4" fill="#2dd4bf"/>`;},
+  step(dt){
+    if(C.follow==='direct'){S.x=P.x;S.y=P.y;}
+    else{const l=1-Math.pow(1-C.lambda,dt*60);S.x+=(P.x-S.x)*l;S.y+=(P.y-S.y)*l;}
+  },
+  draw(){for(const id of ['ptr','pdot']){const r=q(id);r.setAttribute('cx',P.x);r.setAttribute('cy',P.y);r.setAttribute('visibility',C.follow==='lag'?'visible':'hidden');}},
+  readout(){return `pointer=(${f0(P.x)}, ${f0(P.y)})  Clawd=(${f0(S.x)}, ${f0(S.y)})  gap=${f0(Math.hypot(P.x-S.x,P.y-S.y))} px  follow=${C.follow}`;}
+});
+
+/* 4 Physics */
+MODES.push({id:4,name:'Physics',drivers:'P',defaults:{e:.7,tilt:0},links:[['#physics','Physics']],
+  controls:[E_CTL,{type:'range',id:'tilt',label:'Gravity tilt θ',min:-90,max:90,step:1,unit:'°'},
+            {type:'button',label:'Drop',fn:()=>{S.x=HB+Math.random()*(SW-2*HB);S.y=HB+8;M.vx=(Math.random()-.5)*600;M.vy=0;M.on=true;}}],
+  expl:`<p><span class="tag">Driver:</span> forces and constraints. You set the rules. The simulation produces the path.</p>
+<div class="eq">m·ẍ = ΣF &nbsp;&nbsp; F<sub>g</sub> = m·g &nbsp;&nbsp; v<sub>after</sub> = −e·v<sub>before</sub></div>
+<p>e = 0 gives no bounce. e ≈ 1 gives a highly elastic bounce. The tilt slider rotates the gravity vector: g<sub>screen</sub> = R(θ)·g. This is John's gyroscope example: the gravity direction changes, Clawd accelerates, the walls constrain it.</p>
+<p>Compare keyframes: there you author the trajectory. Here you author the rules, and the trajectory is simulated. A bounce slower than 30 px/s stops Clawd, to prevent jitter.</p>`,
+  enter(){M.on=false;M.vx=0;M.vy=0;
+    ov.innerHTML=`<line id="ga" x1="46" y1="46" stroke="#2dd4bf" stroke-width="3" stroke-linecap="round"/><circle id="gt" r="5" fill="#2dd4bf"/>`+txt(12,16,'gravity','start');},
+  step(dt){if(!M.on)return;const a=C.tilt*Math.PI/180;bodyStep(dt,G*Math.sin(a),G*Math.cos(a),C.e);},
+  draw(){const a=C.tilt*Math.PI/180,x=46+34*Math.sin(a),y=46+34*Math.cos(a);
+    q('ga').setAttribute('x2',x);q('ga').setAttribute('y2',y);q('gt').setAttribute('cx',x);q('gt').setAttribute('cy',y);},
+  readout(){const a=C.tilt*Math.PI/180;return M.on?`g=(${f0(G*Math.sin(a))}, ${f0(G*Math.cos(a))}) px/s²  v=(${f0(M.vx)}, ${f0(M.vy)}) px/s  e=${f2(C.e)}`:'press Drop';}
+});
+/* 5 Gesture + spring */
+const nearest=(list,p)=>{let b=0,bd=1e9;list.forEach((s,i)=>{const d=Math.hypot(s.x-p.x,s.y-p.y);if(d<bd){bd=d;b=i;}});return b;};
+MODES.push({id:5,name:'Gesture + spring',drivers:'GS',drag:true,defaults:{preset:'bouncy'},links:[['#gesture-spring','Gestures'],['#springs','Springs']],
+  controls:[PRESET_CTL],
+  expl:`<p><span class="tag">Drivers:</span> gesture, then spring. <span class="tag">Handoff:</span> at release, the position x<sub>r</sub> and velocity v<sub>r</sub> become the starting conditions of the spring.</p>
+<div class="eq">x(t<sub>release</sub>) = x<sub>r</sub>, ẋ(t<sub>release</sub>) = v<sub>r</sub> → m·ẍ + c·ẋ + k(x − x<sub>slot</sub>) = 0</div>
+<p>Drag Clawd and release it. The spring target is the nearest slot. A fast flick carries v<sub>r</sub> into the spring, so Clawd can overshoot the slot. The readout shows x<sub>r</sub> and v<sub>r</sub>.</p>
+<p>John: this is the original iPhone-style fling. The gesture sets the motion. The spring sets how it settles. The motion stays continuous between the finger and the software.</p>`,
+  enter(){
+    S.x=SW/2; S.y=SH*.78; P.x=S.x; P.y=S.y; M.ph='idle'; M.rel=null;
+    M.slots=[.2,.5,.8].map(f=>({x:SW*f,y:SH*.3}));
+    ov.innerHTML=M.slots.map((s,i)=>svgRect('slot'+i,s.x,s.y)+txt(s.x,s.y+4,i+1)).join('');
+  },
+  onGrab(){M.ph='drag';},
+  onRelease(vx,vy){
+    M.t=M.slots[nearest(M.slots,S)]; M.sx={x:S.x,v:vx}; M.sy={x:S.y,v:vy};
+    M.rel={x:S.x,y:S.y,vx,vy}; M.ph='spring';
+  },
+  step(dt){
+    if(M.ph==='drag'){S.x=P.x;S.y=P.y;}
+    else if(M.ph==='spring') springStep2(M.t,sprP(),dt);
+  },
+  draw(){
+    const act=M.ph==='drag'?M.slots[nearest(M.slots,S)]:M.ph==='spring'?M.t:null;
+    M.slots.forEach((s,i)=>q('slot'+i).setAttribute('stroke',s===act?'#2dd4bf':'#94a3b8'));
+  },
+  readout(){const r=M.rel;return r?`released: x_r=(${f0(r.x)}, ${f0(r.y)}) px  v_r=(${f0(r.vx)}, ${f0(r.vy)}) px/s  |v_r|=${f0(Math.hypot(r.vx,r.vy))}`:'drag Clawd, then release it';}
+});
+
+/* 6 Gesture + physics */
+MODES.push({id:6,name:'Gesture + physics',drivers:'GP',drag:true,defaults:{e:.7},links:[['#gesture-spring','Gestures'],['#physics','Physics']],
+  controls:[E_CTL],
+  expl:`<p><span class="tag">Drivers:</span> gesture, then physics. <span class="tag">Handoff:</span> the release position and v<sub>r</sub> are the initial conditions of the simulation.</p>
+<div class="eq">m·ẍ = m·g &nbsp;&nbsp; x(t<sub>release</sub>) = x<sub>r</sub>, ẋ(t<sub>release</sub>) = v<sub>r</sub></div>
+<p>Flick Clawd. It flies with the release velocity, falls under gravity, and bounces with v<sub>after</sub> = −e·v<sub>before</sub>. Item 5 has a target that pulls Clawd to a place. This item has no target. Only gravity and the walls act.</p>`,
+  enter(){M.ph='fly';M.vx=0;M.vy=0;},
+  onGrab(){M.ph='drag';M.vx=0;M.vy=0;},
+  onRelease(vx,vy){M.vx=vx;M.vy=vy;M.ph='fly';},
+  step(dt){if(M.ph==='drag'){S.x=P.x;S.y=P.y;}else bodyStep(dt,0,G,C.e);},
+  readout(){return `${M.ph==='drag'?'holding':'free'}  v=(${f0(M.vx)}, ${f0(M.vy)}) px/s  |v|=${f0(Math.hypot(M.vx,M.vy))}  e=${f2(C.e)}`;}
+});
+
+/* 7 Keyframes + spring */
+MODES.push({id:7,name:'Keyframes + spring',drivers:'KS',defaults:{preset:'bouncy'},links:[['#keyframes','Keyframes'],['#springs','Springs']],
+  controls:[PRESET_CTL,{type:'button',label:'Play',fn:()=>{M.kt=0;M.play=true;}}],
+  expl:`<p><span class="tag">Drivers:</span> keyframes move the target (the dashed box). A spring moves Clawd.</p>
+<div class="eq">m·ẍ + c·ẋ + k(x − x<sub>target</sub>(t)) = 0 &nbsp;&nbsp; x<sub>target</sub>(t) = f(t; θ<sub>author</sub>)</div>
+<p>Press Play. The author sets where the target is at each time. The spring decides how Clawd follows. Clawd lags behind the dashed box and overshoots at the corners. Use the bouncy preset to see the most. A target with constant speed v leaves a steady lag of about c·v/k.</p>`,
+  enter(){
+    M.kt=0; M.play=false; const p=pathAt(0); S.x=p.x; S.y=p.y;
+    M.sx={x:S.x,v:0}; M.sy={x:S.y,v:0};
+    const pts=[0,.8,1.6,2.4].map(t=>{const a=pathAt(t);return a.x+','+a.y;}).join(' ');
+    ov.innerHTML=`<polygon points="${pts}" fill="none" stroke="#334155" stroke-dasharray="4 4"/>`+svgRect('ghost',p.x,p.y,'stroke="#2dd4bf"');
+  },
+  step(dt){
+    if(M.play){M.kt+=dt;if(M.kt>=3.2){M.kt=3.2;M.play=false;}}
+    springStep2(pathAt(M.kt),sprP(),dt);
+  },
+  draw(){const p=pathAt(M.kt),g=q('ghost');g.setAttribute('x',p.x-HB);g.setAttribute('y',p.y-HB);},
+  readout(){const p=pathAt(M.kt);return `t=${f2(M.kt)} s  target=(${f0(p.x)}, ${f0(p.y)})  lag=${f0(Math.hypot(S.x-p.x,S.y-p.y))} px  ${M.play?'playing':'press Play'}`;}
+});
+
+/* 8 Keyframes + gesture */
+MODES.push({id:8,name:'Keyframes + gesture',drivers:'KG',drag:true,defaults:{kon:true},links:[['#compose','Composition']],
+  controls:[{type:'check',id:'kon',label:'Keyframes on'}],
+  expl:`<p><span class="tag">Drivers:</span> gesture owns position. Keyframes own rotation and scale. Each property has one owner, so the drivers do not conflict.</p>
+<div class="eq">[p<sub>x</sub>, p<sub>y</sub>] = f(u(t)) &nbsp;&nbsp; [θ, s] = f(t; θ<sub>author</sub>)</div>
+<p>Drag Clawd. Rotation and scale loop every 2 s on keyframes at 0, 1, and 2 s. The checkbox switches the keyframes off, and the drag still works. John: techniques are combined, and the polish comes from the composition of small effects.</p>`,
+  enter(){M.kt=0;},
+  step(dt){
+    if(C.kon){M.kt=(M.kt+dt)%2;const E=EASE['ease-in-out'];S.rot=kf(KF8,M.kt,'rot',E);S.sx=S.sy=kf(KF8,M.kt,'s',E);}
+    S.x=P.x;S.y=P.y;
+  },
+  readout(){return `position from pointer=(${f0(S.x)}, ${f0(S.y)})   keyframes ${C.kon?'on':'off'}: t=${f2(M.kt)} s  rot=${f0(S.rot*180/Math.PI%360)}°  scale=${f2(S.sx)}`;}
+});
+/* 9 Spring + physics */
+const K_CTL={type:'range',id:'k',label:'Stiffness k',min:4,max:60,step:1}, C_CTL={type:'range',id:'c',label:'Damping c',min:0,max:10,step:.1};
+function tetherEnter(){
+  M.A={x:SW/2,y:SH*.2}; M.vx=0; M.vy=0; S.x=M.A.x; S.y=M.A.y+G/C.k;
+  ov.innerHTML=`<path id="spr" fill="none" stroke="#2dd4bf" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${M.A.x}" cy="${M.A.y}" r="7" fill="#94a3b8"/>`+txt(M.A.x+14,M.A.y-10,'anchor','start');
+}
+const tetherDraw=()=>q('spr').setAttribute('d',zig(M.A.x,M.A.y,S.x,S.y));
+MODES.push({id:9,name:'Spring + physics',drivers:'SP',defaults:{k:16,c:2},links:[['#springs','Springs'],['#physics','Physics']],
+  controls:[K_CTL,C_CTL,
+    {type:'button',label:'Pull and release',fn:()=>{S.x=M.A.x+Math.min(150,SW/2-HB-8);S.y=M.A.y+80;M.vx=0;M.vy=0;}},
+    {type:'button',label:'Kick',fn:()=>{M.vx=(Math.random()<.5?-1:1)*450;M.vy=-200;}}],
+  expl:`<p><span class="tag">Drivers:</span> spring and physics. The spring is one force in the sum. Gravity is another.</p>
+<div class="eq">m·ẍ = −k(x − x<sub>anchor</sub>) − c·ẋ + m·g</div>
+<p>Clawd settles below the anchor by m·g/k, not at the anchor. The readout shows the predicted sag and the measured value. Item 2 has no gravity, so Clawd settles on the target. This item has no pointer: "Pull and release" and "Kick" set the starting state by script. The sliders change k and c.</p>`,
+  enter:tetherEnter,
+  step(dt){tetherStep(dt,.5);},
+  draw:tetherDraw,
+  readout(){return `k=${C.k}  c=${f1(C.c)}  ζ=${f2(C.c/(2*Math.sqrt(C.k)))}   predicted sag m·g/k=${f1(G/C.k)} px   measured y−anchor=${f1(S.y-M.A.y)} px   |v|=${f0(Math.hypot(M.vx,M.vy))}`;}
+});
+
+/* 10 Keyframes + physics */
+const SQ_T=[0,.08,.18,.28];
+MODES.push({id:10,name:'Keyframes + physics',drivers:'KP',defaults:{e:.7},links:[['#keyframes','Keyframes'],['#physics','Physics']],
+  controls:[E_CTL,{type:'button',label:'Drop',fn:()=>{S.x=HB+Math.random()*(SW-2*HB);S.y=HB+8;M.vx=(Math.random()-.5)*300;M.vy=0;M.on=true;}}],
+  expl:`<p><span class="tag">Drivers:</span> physics owns the path (fall and bounce). Keyframes own the shape (squash and stretch). <span class="tag">Trigger:</span> each floor impact.</p>
+<div class="eq">s<sub>y</sub> keyframes at t = 0, 0.08, 0.18, 0.28 s: 1 → 1 − a → 1 + 0.4a → 1 &nbsp;&nbsp; s<sub>x</sub> = 1/s<sub>y</sub></div>
+<p>The squash curve is fixed. The impact speed |v<sub>before</sub>| only scales the amplitude: a = min(0.55, |v<sub>before</sub>|/2400). Impacts under 150 px/s do not squash. Press Drop and watch the small bounces squash less.</p>`,
+  enter(){M.on=false;M.vx=0;M.vy=0;M.sq=-1;M.amp=0;},
+  step(dt){
+    if(M.on){const hit=bodyStep(dt,0,G,C.e);if(hit>150){M.sq=0;M.amp=Math.min(.55,hit/2400);}}
+    if(M.sq>=0){
+      M.sq+=dt;
+      const a=M.amp,fr=[1,1-a,1+.4*a,1].map((s,i)=>({t:SQ_T[i],s}));
+      if(M.sq>=.28){M.sq=-1;S.sx=S.sy=1;S.oy=0;}
+      else{S.sy=kf(fr,M.sq,'s');S.sx=1/S.sy;S.oy=(1-S.sy)*HB;}
+    }
+  },
+  readout(){return M.on?`v=(${f0(M.vx)}, ${f0(M.vy)}) px/s  e=${f2(C.e)}  squash: ${M.sq>=0?`a=${f2(M.amp)}  t=${f2(M.sq)} s`:'idle'}`:'press Drop';}
+});
+
+/* 11 Gesture + spring + physics */
+MODES.push({id:11,name:'Gesture + spring + physics',drivers:'GSP',drag:true,defaults:{k:16,c:1.5,e:.6},links:[['#compose','Composition'],['#physics','Physics']],
+  controls:[K_CTL,C_CTL,E_CTL],
+  expl:`<p><span class="tag">Drivers:</span> gesture, then spring and physics together. <span class="tag">Handoff:</span> x<sub>r</sub> and v<sub>r</sub> at release.</p>
+<div class="eq">m·ẍ = −k(x − x<sub>anchor</sub>) − c·ẋ + m·g &nbsp;&nbsp; v<sub>after</sub> = −e·v<sub>before</sub> at the walls</div>
+<p>Drag Clawd on its tether and release it. A fast flick throws it toward a wall. The wall bounces it with e, and the spring pulls it back. Item 9 has no pointer. This item adds the gesture.</p>`,
+  enter(){tetherEnter();M.ph='sim';},
+  onGrab(){M.ph='drag';M.vx=0;M.vy=0;},
+  onRelease(vx,vy){M.vx=vx;M.vy=vy;M.ph='sim';},
+  step(dt){if(M.ph==='drag'){S.x=P.x;S.y=P.y;}else tetherStep(dt,C.e);},
+  draw:tetherDraw,
+  readout(){return `${M.ph==='drag'?'holding':'free'}  v=(${f0(M.vx)}, ${f0(M.vy)}) px/s  k=${C.k}  c=${f1(C.c)}  e=${f2(C.e)}`;}
+});
+
+/* 12 Keyframes + gesture + spring */
+MODES.push({id:12,name:'Keyframes + gesture + spring',drivers:'KGS',drag:true,defaults:{preset:'snappy'},links:[['#compose','Composition']],
+  controls:[PRESET_CTL,{type:'button',label:'Pause path',fn:b=>{M.paused=!M.paused;b.textContent=M.paused?'Resume path':'Pause path';}}],
+  expl:`<p><span class="tag">Drivers:</span> keyframes, gesture, and spring. The phase decides the owner of Clawd. "Pause path" freezes the keyframe clock so you can grab Clawd with ease.</p>
+<div class="eq">play: x = x<sub>path</sub>(t) → grab: x = x<sub>pointer</sub> → return: spring to x<sub>path</sub>(t) → play</div>
+<p>While you hold Clawd, the path is paused, and the dashed box shows where the path is. After release, x<sub>r</sub> and v<sub>r</sub> start the spring. When |x − x<sub>path</sub>| &lt; 1.5 px and |ẋ| &lt; 15 px/s, the keyframes take Clawd back and the path continues. The readout shows the phase.</p>`,
+  enter(){
+    M.ph='play'; M.kt=0; M.paused=false; const p=pathAt(0); S.x=p.x; S.y=p.y;
+    const pts=[0,.8,1.6,2.4].map(t=>{const a=pathAt(t);return a.x+','+a.y;}).join(' ');
+    ov.innerHTML=`<polygon points="${pts}" fill="none" stroke="#334155" stroke-dasharray="4 4"/>`+svgRect('ghost',p.x,p.y,'stroke="#2dd4bf"');
+  },
+  onGrab(){M.ph='drag';},
+  onRelease(vx,vy){M.sx={x:S.x,v:vx};M.sy={x:S.y,v:vy};M.ph='return';},
+  step(dt){
+    if(M.ph==='play'){if(!M.paused)M.kt=(M.kt+dt)%3.2;const p=pathAt(M.kt);S.x=p.x;S.y=p.y;}
+    else if(M.ph==='drag'){S.x=P.x;S.y=P.y;}
+    else{
+      const p=pathAt(M.kt); springStep2(p,sprP(),dt);
+      if(settled(M.sx,p.x)&&settled(M.sy,p.y)) M.ph='play';
+    }
+  },
+  draw(){const p=pathAt(M.kt),g=q('ghost');g.setAttribute('x',p.x-HB);g.setAttribute('y',p.y-HB);g.setAttribute('visibility',M.ph==='play'?'hidden':'visible');},
+  readout(){return `phase=${M.ph}  path t=${f2(M.kt)} s${M.paused?' (paused)':''}  owner=${M.ph==='play'?'keyframes':M.ph==='drag'?'gesture':'spring'}`;}
+});
+
+/* 13 Full chain */
+const CEL=[{t:0,rot:0,s:1},{t:.45,rot:Math.PI,s:1.35},{t:.9,rot:2*Math.PI,s:1}];
+function spawnDots(){
+  for(let i=0;i<20;i++){
+    const a=Math.random()*Math.PI*2,sp=150+Math.random()*300,d=document.createElement('div');
+    d.className='dot'; d.style.background=i%2?'#2dd4bf':'#fb923c'; dotsEl.appendChild(d);
+    M.dots.push({el:d,x:S.x,y:S.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-150,life:1});
+  }
+}
+MODES.push({id:13,name:'Full chain',drivers:'KSGP',drag:true,defaults:{preset:'snappy'},links:[['#compose','Composition'],['#taxonomy','Taxonomy']],
+  controls:[PRESET_CTL],
+  expl:`<p><span class="tag">Chain:</span> gesture → spring → physics (dots) → keyframes (celebration) → spring (return) → idle.</p>
+<p>This follows section 8 of the theory page. Drag Clawd and release it within 150 px of the slot. The spring snaps it in. When it settles, 20 dots burst under gravity (physics), and a keyframed spin and scale plays at 0, 0.45, and 0.9 s. Then a spring returns Clawd home. Release outside 150 px, and the spring returns Clawd home with no celebration.</p>
+<p>The theory page chain also has a layout transition and a state-machine reaction. This demo does not have them. John: the polish comes from many small effects composed, not from one large effect.</p>`,
+  enter(){
+    M.home={x:SW*.2,y:SH*.75}; M.slot={x:SW*.78,y:SH*.3}; M.dots=[]; M.ph='idle'; M.ct=0;
+    S.x=M.home.x; S.y=M.home.y; P.x=S.x; P.y=S.y;
+    ov.innerHTML=`<circle cx="${M.slot.x}" cy="${M.slot.y}" r="${SNAP}" fill="none" stroke="#334155" stroke-dasharray="4 6"/>`+
+      svgRect('slot',M.slot.x,M.slot.y)+txt(M.slot.x,M.slot.y+4,'slot')+
+      svgRect('home',M.home.x,M.home.y,'stroke="#334155"')+txt(M.home.x,M.home.y+4,'home');
+  },
+  canGrab(){return M.ph==='idle';},
+  onGrab(){M.ph='drag';},
+  onRelease(vx,vy){
+    const toSlot=Math.hypot(S.x-M.slot.x,S.y-M.slot.y)<SNAP;
+    M.t=toSlot?M.slot:M.home; M.sx={x:S.x,v:vx}; M.sy={x:S.y,v:vy}; M.ph=toSlot?'snap':'home';
+  },
+  step(dt){
+    const ph=M.ph;
+    if(ph==='drag'){S.x=P.x;S.y=P.y;}
+    else if(ph==='snap'||ph==='home'){
+      springStep2(M.t,sprP(),dt);
+      if(settled(M.sx,M.t.x)&&settled(M.sy,M.t.y)){
+        if(ph==='snap'){M.ph='celebrate';M.ct=0;spawnDots();}
+        else{M.ph='idle';S.x=M.home.x;S.y=M.home.y;}
+      }
+    }else if(ph==='celebrate'){
+      M.ct+=dt;
+      if(M.ct>=.9){S.rot=0;S.sx=S.sy=1;M.t=M.home;M.sx={x:S.x,v:0};M.sy={x:S.y,v:0};M.ph='home';}
+      else{const E=EASE['ease-in-out'];S.rot=kf(CEL,M.ct,'rot',E);S.sx=S.sy=kf(CEL,M.ct,'s',E);}
+    }
+    M.dots=M.dots.filter(d=>{
+      d.vy+=G*dt; d.x+=d.vx*dt; d.y+=d.vy*dt;
+      if(d.y>SH-4){d.y=SH-4;d.vy*=-.5;}
+      d.life-=dt*1.1;
+      if(d.life<=0){d.el.remove();return false;}
+      return true;
+    });
+  },
+  draw(){
+    for(const d of M.dots){d.el.style.transform=`translate(${d.x-4}px,${d.y-4}px)`;d.el.style.opacity=d.life;}
+    q('slot').setAttribute('stroke',M.ph==='drag'&&Math.hypot(S.x-M.slot.x,S.y-M.slot.y)<SNAP?'#2dd4bf':'#94a3b8');
+  },
+  readout(){return `phase=${M.ph}  dots=${M.dots.length}  distance to slot=${f0(Math.hypot(S.x-M.slot.x,S.y-M.slot.y))} px (snap under ${SNAP})`;}
+});
+
+/* ---- self-check ---- */
+function selfCheck(){
+  let ok=true; const t=(c,m)=>{if(!c){ok=false;console.assert(false,m);}};
+  for(const f of KF1) t(Math.abs(kf(KF1,f.t,'x',EASE['ease-in-out'])-f.x)<1e-9,'keyframe value at t='+f.t);
+  for(const k of Object.keys(EASE)) t(Math.abs(EASE[k](0))<1e-12&&Math.abs(EASE[k](1)-1)<1e-12,'easing endpoints '+k);
+  const p={m:1,k:36,c:12}, a={x:0,v:0};
+  for(let i=0;i<240;i++) stepSpring(a,100,p,DT);
+  t(Math.abs(a.x-100)<1&&Math.abs(a.v)<5,'spring with zeta=1 settles within 2 s');
+  console.log('[demo] self-check',ok?'ok':'FAILED');
+}
+selfCheck();
+buildNav();
+lastW=stage.clientWidth; lastH=stage.clientHeight;
+setMode(clamp(parseInt(location.hash.slice(1))||1,1,MODES.length));
+window.addEventListener('hashchange',()=>{ // setMode sets cur before it sets the hash, so its own hash write does not loop
+  const n=parseInt(location.hash.slice(1));
+  if(n>=1&&n<=MODES.length&&n!==cur) setMode(n);
+});
+requestAnimationFrame(t=>{last=t;requestAnimationFrame(frame);});
+})();
+</script>
+</body>
+</html>
